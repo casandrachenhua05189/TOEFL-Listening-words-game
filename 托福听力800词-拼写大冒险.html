@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>托福听力800词 · 拼写大冒险</title>
+<style>
+:root{--ink:#1a1a1a;--sub:#666;--faint:#999;--line:#e5e5e2;--bg:#f6f6f4;--ok:#2e9e5b;--bad:#d64545;--gold:#b8860b}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;display:flex;justify-content:center;padding:20px 14px}
+#app{width:100%;max-width:600px}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:26px}
+h1{font-size:22px}
+.sub{color:var(--sub);font-size:13px;margin:4px 0 20px}
+.mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
+.mode{border:1.5px solid var(--line);border-radius:14px;padding:18px 14px;cursor:pointer;background:#fff;text-align:left;transition:border-color .15s}
+.mode:hover{border-color:var(--ink)}
+.mode.sel{border-color:var(--ink);background:#fafaf8}
+.mode .t{font-size:16px;font-weight:700;margin-bottom:4px}
+.mode .d{font-size:12px;color:var(--sub);line-height:1.5}
+.mode.wide{grid-column:1/3;display:flex;justify-content:space-between;align-items:center}
+.mode .count{font-size:13px;color:var(--gold);font-weight:700}
+.opt-title{font-size:13px;color:var(--sub);margin:14px 0 8px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);border-radius:999px;padding:6px 13px;font-size:12.5px;background:#fff;cursor:pointer}
+.chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.btn{display:inline-block;background:var(--ink);color:#fff;border:none;border-radius:10px;padding:12px 26px;font-size:15px;cursor:pointer;font-family:inherit}
+.btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+.btn:disabled{opacity:.4;cursor:default}
+.hud{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--sub);margin-bottom:8px;flex-wrap:wrap;gap:6px}
+.hud b{color:var(--ink)}
+.hearts{font-size:14px;letter-spacing:2px}
+.combo{font-size:13px;color:var(--gold);font-weight:700;min-height:18px;text-align:center;margin-bottom:4px}
+.combo.pop{animation:pop .3s}
+@keyframes pop{50%{transform:scale(1.25)}}
+.progress{height:6px;background:#eee;border-radius:99px;overflow:hidden;margin-bottom:22px}
+.progress>div{height:100%;background:var(--ink);border-radius:99px;transition:width .25s}
+.timerbar{height:6px;background:#eee;border-radius:99px;overflow:hidden;margin-bottom:20px}
+.timerbar>div{height:100%;background:var(--ok);border-radius:99px;transition:width 1s linear}
+.timerbar.low>div{background:var(--bad)}
+.prompt{text-align:center;margin:22px 0 8px}
+.prompt .mean{font-size:23px;font-weight:700;line-height:1.4}
+.prompt .pos{font-size:14px;color:var(--sub);margin-top:6px}
+.prompt .hint{font-family:ui-monospace,Menlo,monospace;font-size:17px;letter-spacing:3px;color:var(--faint);margin-top:14px;min-height:22px}
+.speakrow{text-align:center;margin-bottom:14px}
+.speak{border:none;background:none;font-size:13px;color:#555;text-decoration:underline;cursor:pointer;font-family:inherit}
+input[type=text]{width:100%;padding:14px;font-size:19px;border:1.5px solid var(--line);border-radius:10px;text-align:center;letter-spacing:1px;margin-bottom:12px;font-family:inherit}
+input[type=text]:focus{outline:none;border-color:var(--ink)}
+input[type=text].ok{border-color:var(--ok);background:#f0faf3}
+input[type=text].bad{border-color:var(--bad);background:#fdf1f1}
+.feedback{min-height:24px;font-size:14px;text-align:center;margin-bottom:12px}
+.feedback .ok{color:var(--ok)}
+.feedback .bad{color:var(--bad)}
+.row{display:flex;gap:8px}
+.row .btn{flex:1;padding:11px 8px;font-size:14px}
+.quizgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}
+.qopt{border:1.5px solid var(--line);border-radius:10px;padding:14px 8px;font-size:15px;background:#fff;cursor:pointer;font-family:inherit}
+.qopt:hover{border-color:var(--ink)}
+.qopt.ok{border-color:var(--ok);background:#f0faf3;color:var(--ok);font-weight:700}
+.qopt.bad{border-color:var(--bad);background:#fdf1f1;color:var(--bad)}
+.result{text-align:center}
+.score{font-size:54px;font-weight:800;font-variant-numeric:tabular-nums}
+.score small{font-size:20px;color:var(--sub)}
+.statchips{display:flex;justify-content:center;gap:8px;margin:14px 0 6px;flex-wrap:wrap}
+.statchip{border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-size:12.5px;color:var(--sub)}
+.statchip b{color:var(--ink)}
+.grade{color:var(--sub);margin:8px 0 20px;font-size:14px}
+.wrong-title{text-align:left;font-size:13px;color:var(--sub);margin-bottom:10px}
+.wrong-item{display:flex;justify-content:space-between;padding:9px 4px;border-bottom:1px dashed var(--line);font-size:14.5px;gap:8px}
+.wrong-item .w{font-weight:700;cursor:pointer;white-space:nowrap}
+.wrong-item .c{color:var(--sub);font-size:12.5px;text-align:right}
+.empty{color:var(--ok);text-align:center;padding:12px;font-size:14px}
+.best{font-size:12px;color:var(--faint);margin-top:10px;text-align:center}
+.shake{animation:shake .35s}
+@keyframes shake{20%{transform:translateX(-5px)}40%{transform:translateX(5px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+.bigbtns{margin-top:18px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- 首页 -->
+<div class="card" id="home">
+  <h1>托福听力800词 · 拼写大冒险</h1>
+  <p class="sub">基于《2026托福改革后听力高频800词》词库 · 765 词 / 19 话题</p>
+  <div class="mode-grid">
+    <button class="mode sel" data-mode="spell">
+      <div class="t">闯关模式</div>
+      <div class="d">看中文释义默写英文单词，3 颗红心，连击加分，答错扣心</div>
+    </button>
+    <button class="mode" data-mode="quiz">
+      <div class="t">限时快答</div>
+      <div class="d">60 秒四选一，答对 +1 秒，答错 -3 秒，挑战手速上限</div>
+    </button>
+    <button class="mode wide" data-mode="review">
+      <div><div class="t">错词本复习</div><div class="d">针对性重练标记为"未掌握"的单词，答对即移出错词本</div></div>
+      <span class="count" id="wrongCount">0 词待复习</span>
+    </button>
+  </div>
+  <div class="opt-title">选择话题范围（闯关 / 快答模式生效）</div>
+  <div class="chips" id="topicChips"></div>
+  <div style="text-align:center;margin-top:22px">
+    <button class="btn" id="startBtn" style="width:100%">开始游戏</button>
+    <p class="best" id="bestLine"></p>
+  </div>
+</div>
+
+<!-- 游戏页 -->
+<div class="card" id="game" style="display:none">
+  <div class="hud">
+    <span id="hudLeft"></span>
+    <span class="hearts" id="hudHearts"></span>
+    <span id="hudRight"></span>
+  </div>
+  <div class="combo" id="combo"></div>
+  <div class="progress" id="progWrap"><div id="prog" style="width:0%"></div></div>
+  <div class="timerbar" id="timerWrap" style="display:none"><div id="timer" style="width:100%"></div></div>
+
+  <div id="spellArea">
+    <div class="prompt">
+      <div class="mean" id="gMean"></div>
+      <div class="pos" id="gPos"></div>
+      <div class="hint" id="gHint"></div>
+    </div>
+    <div class="speakrow"><button class="speak" id="gSpeak">🔊 听发音</button></div>
+    <input type="text" id="gInput" placeholder="输入英文，回车提交" autocomplete="off" autocapitalize="off" spellcheck="false">
+    <div class="feedback" id="gFb"></div>
+    <div class="row">
+      <button class="btn" id="gSubmit">提交</button>
+      <button class="btn ghost" id="gHintBtn">提示首字母</button>
+      <button class="btn ghost" id="gSkip">认识，跳过</button>
+    </div>
+  </div>
+
+  <div id="quizArea" style="display:none">
+    <div class="prompt">
+      <div class="mean" id="qMean"></div>
+      <div class="pos" id="qPos"></div>
+    </div>
+    <div class="speakrow"><button class="speak" id="qSpeak">🔊 听发音（送分提示）</button></div>
+    <div class="quizgrid" id="qOpts"></div>
+    <div class="feedback" id="qFb"></div>
+  </div>
+</div>
+
+<!-- 结算页 -->
+<div class="card result" id="result" style="display:none">
+  <h1 id="rTitle" style="font-size:20px">本局结束</h1>
+  <div class="score"><span id="rScore">0</span><small> 分</small></div>
+  <div class="statchips" id="rStats"></div>
+  <p class="grade" id="rGrade"></p>
+  <div style="text-align:left;margin-bottom:6px">
+    <div class="wrong-title">本局错词（点击听发音，已自动存入错词本）</div>
+    <div id="rWrong"></div>
+  </div>
+  <div class="bigbtns">
+    <button class="btn" id="rRetry">再来一局</button>
+    <button class="btn ghost" id="rReview">练错词本</button>
+    <button class="btn ghost" id="rHome">返回首页</button>
+  </div>
+</div>
+
+</div>
+<script>
+var TOPICS = ["工作场合", "日程安排", "人际交往", "商业经济", "酒店住宿", "图书馆", "银行业务", "课程注册", "健康医疗", "校园政策", "校园活动", "心理学", "艺术", "地球科学", "生态", "生物", "天文", "历史", "环境科学"];
+var DATA = [["resume", "/ˈrezəmeɪ/", "n.简历", "工作场合"], ["interview", "/ˈɪntəvjuː/", "n.&v.面试", "工作场合"], ["recruit", "/rɪˈkruːt/", "v.招聘；招募", "工作场合"], ["promote", "/prəˈməʊt/", "v.晋升；推广", "工作场合"], ["resign", "/rɪˈzaɪn/", "v.辞职", "工作场合"], ["salary", "/ˈsæləri/", "n.薪水", "工作场合"], ["bonus", "/ˈbəʊnəs/", "n.奖金；红利", "工作场合"], ["commission", "/kəˈmɪʃn/", "n.佣金", "工作场合"], ["overtime", "/ˈəʊvətaɪm/", "n.&adj.加班（的）", "工作场合"], ["vacation", "/veɪˈkeɪʃn/", "n.假期", "工作场合"], ["leave", "/liːv/", "n.休假", "工作场合"], ["pension", "/ˈpenʃn/", "n.退休金", "工作场合"], ["contract", "/ˈkɒntrækt/", "n.合同", "工作场合"], ["deadline", "/ˈdedlaɪn/", "n.截止日期", "工作场合"], ["project", "/ˈprɒdʒekt/", "n.项目", "工作场合"], ["collaborate", "/kəˈlæbəreɪt/", "v.合作", "工作场合"], ["teamwork", "/ˈtiːmwɜːk/", "n.团队合作", "工作场合"], ["meeting", "/ˈmiːtɪŋ/", "n.会议", "工作场合"], ["conference", "/ˈkɒnfərəns/", "n.会议；研讨会", "工作场合"], ["presentation", "/ˌpreznˈteɪʃn/", "n.演示；报告", "工作场合"], ["negotiate", "/nɪˈɡəʊʃieɪt/", "v.谈判；协商", "工作场合"], ["client", "/ˈklaɪənt/", "n.客户", "工作场合"], ["customer", "/ˈkʌstəmə(r)/", "n.顾客", "工作场合"], ["feedback", "/ˈfiːdbæk/", "n.反馈", "工作场合"], ["complaint", "/kəmˈpleɪnt/", "n.投诉", "工作场合"], ["performance", "/pəˈfɔːməns/", "n.表现；业绩", "工作场合"], ["efficiency", "/ɪˈfɪʃnsi/", "n.效率", "工作场合"], ["productivity", "/ˌprɒdʌkˈtɪvəti/", "n.生产力", "工作场合"], ["responsibility", "/rɪˌspɒnsəˈbɪləti/", "n.责任", "工作场合"], ["task", "/tɑːsk/", "n.任务", "工作场合"], ["duty", "/ˈdjuːti/", "n.职责", "工作场合"], ["shift", "/ʃɪft/", "n.轮班", "工作场合"], ["supervisor", "/ˈsuːpəvaɪzə(r)/", "n.主管", "工作场合"], ["colleague", "/ˈkɒliːɡ/", "n.同事", "工作场合"], ["employee", "/ɪmˈplɔɪiː/", "n.员工", "工作场合"], ["employer", "/ɪmˈplɔɪə(r)/", "n.雇主", "工作场合"], ["intern", "/ˈɪntɜːn/", "n.实习生", "工作场合"], ["trainee", "/ˌtreɪˈniː/", "n.受训者", "工作场合"], ["qualification", "/ˌkwɒlɪfɪˈkeɪʃn/", "n.资格；学历", "工作场合"], ["certificate", "/səˈtɪfɪkət/", "n.证书", "工作场合"], ["diploma", "/dɪˈpləʊmə/", "n.文凭", "工作场合"], ["appointment", "/əˈpɔɪntmənt/", "n.预约", "工作场合"], ["schedule", "/ˈʃedjuːl/", "n.日程表", "工作场合"], ["flexible", "/ˈfleksəbl/", "adj.灵活的", "工作场合"], ["remote", "/rɪˈməʊt/", "adj.远程的", "工作场合"], ["telecommute", "/ˌtelikəˈmjuːt/", "v.远程办公", "工作场合"], ["layoff", "/ˈleɪɒf/", "n.裁员", "工作场合"], ["downturn", "/ˈdaʊntɜːn/", "n.衰退", "工作场合"], ["bankruptcy", "/ˈbæŋkrʌptsi/", "n.破产", "工作场合"], ["merger", "/ˈmɜːdʒə(r)/", "n.合并", "工作场合"], ["arrange", "/əˈreɪndʒ/", "v.安排", "日程安排"], ["postpone", "/pəˈspəʊn/", "v.推迟", "日程安排"], ["delay", "/dɪˈleɪ/", "v.&n.延迟", "日程安排"], ["cancel", "/ˈkænsl/", "v.取消", "日程安排"], ["reschedule", "/ˌriːˈʃedjuːl/", "v.重新安排", "日程安排"], ["due", "/djuː/", "adj.到期的", "日程安排"], ["punctual", "/ˈpʌŋktʃuəl/", "adj.准时的", "日程安排"], ["prompt", "/prɒmpt/", "adj.及时的", "日程安排"], ["on time", "/ɒntaɪm/", "短语准时", "日程安排"], ["in time", "/ɪntaɪm/", "短语及时", "日程安排"], ["ahead of time", "/əˈhedɒvtaɪm/", "短语提前", "日程安排"], ["in advance", "/ɪnədˈvɑːns/", "短语提前", "日程安排"], ["last minute", "/lɑːstˈmɪnɪt/", "短语最后一刻", "日程安排"], ["timetable", "/ˈtaɪmteɪbl/", "n.时刻表", "日程安排"], ["agenda", "/əˈdʒendə/", "n.议程", "日程安排"], ["calendar", "/ˈkælɪndə(r)/", "n.日历", "日程安排"], ["reminder", "/rɪˈmaɪndə(r)/", "n.提醒", "日程安排"], ["notify", "/ˈnəʊtɪfaɪ/", "v.通知", "日程安排"], ["inform", "/ɪnˈfɔːm/", "v.告知", "日程安排"], ["confirm", "/kənˈfɜːm/", "v.确认", "日程安排"], ["tentative", "/ˈtentətɪv/", "adj.暂定的", "日程安排"], ["definite", "/ˈdefɪnət/", "adj.确定的", "日程安排"], ["overlap", "/ˌəʊvəˈlæp/", "v.时间重叠", "日程安排"], ["conflict", "/ˈkɒnflɪkt/", "n.时间冲突", "日程安排"], ["allocate", "/ˈæləkeɪt/", "v.分配", "日程安排"], ["prioritize", "/praɪˈɒrətaɪz/", "v.优先处理", "日程安排"], ["urgent", "/ˈɜːdʒənt/", "adj.紧急的", "日程安排"], ["emergency", "/ɪˈmɜːdʒənsi/", "n.紧急情况", "日程安排"], ["routine", "/ruːˈtiːn/", "n.日常惯例", "日程安排"], ["regular", "/ˈreɡjələ(r)/", "adj.定期的", "日程安排"], ["occasional", "/əˈkeɪʒənl/", "adj.偶尔的", "日程安排"], ["frequent", "/ˈfriːkwənt/", "adj.频繁的", "日程安排"], ["duration", "/djuˈreɪʃn/", "n.持续时间", "日程安排"], ["session", "/ˈseʃn/", "n.一场；一节", "日程安排"], ["interval", "/ˈɪntəvl/", "n.间隔", "日程安排"], ["break", "/breɪk/", "n.休息时间", "日程安排"], ["acquaintance", "/əˈkweɪntəns/", "n.熟人", "人际交往"], ["roommate", "/ˈruːmmeɪt/", "n.室友", "人际交往"], ["neighbor", "/ˈneɪbə(r)/", "n.邻居", "人际交往"], ["companion", "/kəmˈpænjən/", "n.同伴", "人际交往"], ["peer", "/pɪə(r)/", "n.同龄人", "人际交往"], ["ally", "/ˈælaɪ/", "n.盟友", "人际交往"], ["rival", "/ˈraɪvl/", "n.对手", "人际交往"], ["stranger", "/ˈstreɪndʒə(r)/", "n.陌生人", "人际交往"], ["introvert", "/ˈɪntrəvɜːt/", "n.内向的人", "人际交往"], ["extrovert", "/ˈekstrəvɜːt/", "n.外向的人", "人际交往"], ["amicable", "/ˈæmɪkəbl/", "adj.友好的", "人际交往"], ["hostile", "/ˈhɒstaɪl/", "adj.敌对的", "人际交往"], ["cordial", "/ˈkɔːdiəl/", "adj.热情友好的", "人际交往"], ["sociable", "/ˈsəʊʃəbl/", "adj.好交际的", "人际交往"], ["reserved", "/rɪˈzɜːvd/", "adj.矜持的", "人际交往"], ["generous", "/ˈdʒenərəs/", "adj.慷慨的", "人际交往"], ["stingy", "/ˈstɪndʒi/", "adj.吝啬的", "人际交往"], ["honest", "/ˈɒnɪst/", "adj.诚实的", "人际交往"], ["sincere", "/sɪnˈsɪə(r)/", "adj.真诚的", "人际交往"], ["deceitful", "/dɪˈsiːtfl/", "adj.欺诈的", "人际交往"], ["reliable", "/rɪˈlaɪəbl/", "adj.可靠的", "人际交往"], ["unreliable", "/ˌʌnrɪˈlaɪəbl/", "adj.不可靠的", "人际交往"], ["trustworthy", "/ˈtrʌstwɜːði/", "adj.值得信赖的", "人际交往"], ["betray", "/bɪˈtreɪ/", "v.背叛", "人际交往"], ["support", "/səˈpɔːt/", "v.&n.支持", "人际交往"], ["encourage", "/ɪnˈkʌrɪdʒ/", "v.鼓励", "人际交往"], ["motivate", "/ˈməʊtɪveɪt/", "v.激励", "人际交往"], ["console", "/kənˈsəʊl/", "v.安慰", "人际交往"], ["sympathize", "/ˈsɪmpəθaɪz/", "v.同情", "人际交往"], ["empathize", "/ˈempəθaɪz/", "v.共情", "人际交往"], ["forgive", "/fəˈɡɪv/", "v.原谅", "人际交往"], ["apologize", "/əˈpɒlədʒaɪz/", "v.道歉", "人际交往"], ["quarrel", "/ˈkwɒrəl/", "v.&n.争吵", "人际交往"], ["argue", "/ˈɑːɡjuː/", "v.争论", "人际交往"], ["compromise", "/ˈkɒmprəmaɪz/", "v.&n.妥协", "人际交往"], ["cooperate", "/kəʊˈɒpəreɪt/", "v.合作", "人际交往"], ["gossip", "/ˈɡɒsɪp/", "v.&n.八卦", "人际交往"], ["flatter", "/ˈflætə(r)/", "v.奉承", "人际交往"], ["criticize", "/ˈkrɪtɪsaɪz/", "v.批评", "人际交往"], ["praise", "/preɪz/", "v.&n.表扬", "人际交往"], ["commend", "/kəˈmend/", "v.称赞", "人际交往"], ["grateful", "/ˈɡreɪtfl/", "adj.感激的", "人际交往"], ["entrepreneur", "/ˌɒntrəprəˈnɜː(r)/", "n.企业家", "商业经济"], ["venture", "/ˈventʃə(r)/", "n.风险投资", "商业经济"], ["startup", "/ˈstɑːtʌp/", "n.初创公司", "商业经济"], ["corporation", "/ˌkɔːpəˈreɪʃn/", "n.公司", "商业经济"], ["firm", "/fɜːm/", "n.公司", "商业经济"], ["enterprise", "/ˈentəpraɪz/", "n.企业", "商业经济"], ["brand", "/brænd/", "n.品牌", "商业经济"], ["marketing", "/ˈmɑːkɪtɪŋ/", "n.市场营销", "商业经济"], ["advertising", "/ˈædvətaɪzɪŋ/", "n.广告宣传", "商业经济"], ["promotion", "/prəˈməʊʃn/", "n.促销；晋升", "商业经济"], ["discount", "/ˈdɪskaʊnt/", "n.&v.折扣；打折", "商业经济"], ["retail", "/ˈriːteɪl/", "n.零售", "商业经济"], ["wholesale", "/ˈhəʊlseɪl/", "n.批发", "商业经济"], ["profit", "/ˈprɒfɪt/", "n.利润", "商业经济"], ["revenue", "/ˈrevənjuː/", "n.收入", "商业经济"], ["budget", "/ˈbʌdʒɪt/", "n.预算", "商业经济"], ["expense", "/ɪkˈspens/", "n.开支", "商业经济"], ["investment", "/ɪnˈvestmənt/", "n.投资", "商业经济"], ["asset", "/ˈæset/", "n.资产", "商业经济"], ["liability", "/ˌlaɪəˈbɪləti/", "n.负债", "商业经济"], ["invoice", "/ˈɪnvɔɪs/", "n.发票", "商业经济"], ["receipt", "/rɪˈsiːt/", "n.收据", "商业经济"], ["partnership", "/ˈpɑːtnəʃɪp/", "n.合作关系", "商业经济"], ["franchise", "/ˈfræntʃaɪz/", "n.特许经营权", "商业经济"], ["intellectual property", "/ˌɪntəˈlektʃuəlˈprɒpəti/", "n.知识产权", "商业经济"], ["patent", "/ˈpeɪtnt/", "n.专利", "商业经济"], ["copyright", "/ˈkɒpiraɪt/", "n.版权", "商业经济"], ["trademark", "/ˈtreɪdmɑːk/", "n.商标", "商业经济"], ["acquisition", "/ˌækwɪˈzɪʃn/", "n.收购", "商业经济"], ["monopoly", "/məˈnɒpəli/", "n.垄断", "商业经济"], ["competition", "/ˌkɒmpəˈtɪʃn/", "n.竞争", "商业经济"], ["customer service", "/ˈkʌstəməˈsɜːvɪs/", "n.客户服务", "商业经济"], ["supply chain", "/səˈplaɪtʃeɪn/", "n.供应链", "商业经济"], ["inventory", "/ˈɪnvəntri/", "n.库存", "商业经济"], ["stock", "/stɒk/", "n.库存；股票", "商业经济"], ["shareholder", "/ˈʃeəhəʊldə(r)/", "n.股东", "商业经济"], ["board of directors", "/bɔːdɒvdaɪˈrektəz/", "n.董事会", "商业经济"], ["CEO", "/ˌsiːiːˈəʊ/", "n.首席执行官", "商业经济"], ["market research", "/ˈmɑːkɪtrɪˈsɜːtʃ/", "n.市场调研", "商业经济"], ["target audience", "/ˈtɑːɡɪtˈɔːdiəns/", "n.目标受众", "商业经济"], ["e-commerce", "/ˈiːkɒmɜːs/", "n.电子商务", "商业经济"], ["logistics", "/ləˈdʒɪstɪks/", "n.物流", "商业经济"], ["outsourcing", "/ˈaʊtsɔːsɪŋ/", "n.外包", "商业经济"], ["reservation", "/ˌrezəˈveɪʃn/", "n.预订", "酒店住宿"], ["book", "/bʊk/", "v.预订", "酒店住宿"], ["check-in", "/ˈtʃekɪn/", "n.&v.办理入住", "酒店住宿"], ["check-out", "/ˈtʃekaʊt/", "n.&v.办理退房", "酒店住宿"], ["front desk", "/frʌntdesk/", "n.前台", "酒店住宿"], ["receptionist", "/rɪˈsepʃənɪst/", "n.接待员", "酒店住宿"], ["suite", "/swiːt/", "n.套房", "酒店住宿"], ["single room", "/ˈsɪŋɡlruːm/", "n.单人间", "酒店住宿"], ["double room", "/ˈdʌblruːm/", "n.双人间", "酒店住宿"], ["twin room", "/twɪnruːm/", "n.双床房", "酒店住宿"], ["amenities", "/əˈmiːnətiz/", "n.便利设施", "酒店住宿"], ["buffet", "/ˈbʊfeɪ/", "n.自助餐", "酒店住宿"], ["room service", "/ruːmˈsɜːvɪs/", "n.客房服务", "酒店住宿"], ["laundry service", "/ˈlɔːndriˈsɜːvɪs/", "n.洗衣服务", "酒店住宿"], ["dry cleaning", "/draɪˈkliːnɪŋ/", "n.干洗", "酒店住宿"], ["gym", "/dʒɪm/", "n.健身房", "酒店住宿"], ["swimming pool", "/ˈswɪmɪŋpuːl/", "n.游泳池", "酒店住宿"], ["sauna", "/ˈsɔːnə/", "n.桑拿房", "酒店住宿"], ["concierge", "/ˌkɒnsiˈeədʒ/", "n.礼宾员", "酒店住宿"], ["luggage", "/ˈlʌɡɪdʒ/", "n.行李", "酒店住宿"], ["bellboy", "/ˈbelbɔɪ/", "n.行李员", "酒店住宿"], ["wake-up call", "/ˈweɪkʌpkɔːl/", "n.叫醒服务", "酒店住宿"], ["occupancy", "/ˈɒkjəpənsi/", "n.入住率", "酒店住宿"], ["rate", "/reɪt/", "n.房价", "酒店住宿"], ["complimentary", "/ˌkɒmplɪˈmentri/", "adj.免费的", "酒店住宿"], ["lobby", "/ˈlɒbi/", "n.大堂", "酒店住宿"], ["elevator", "/ˈelɪveɪtə(r)/", "n.电梯", "酒店住宿"], ["staircase", "/ˈsteəkeɪs/", "n.楼梯", "酒店住宿"], ["corridor", "/ˈkɒrɪdɔː(r)/", "n.走廊", "酒店住宿"], ["balcony", "/ˈbælkəni/", "n.阳台", "酒店住宿"], ["view", "/vjuː/", "n.景色", "酒店住宿"], ["noise", "/nɔɪz/", "n.噪音", "酒店住宿"], ["maintenance", "/ˈmeɪntənəns/", "n.维修", "酒店住宿"], ["air conditioner", "/eəkənˈdɪʃənə(r)/", "n.空调", "酒店住宿"], ["heating", "/ˈhiːtɪŋ/", "n.暖气", "酒店住宿"], ["towels", "/ˈtaʊəlz/", "n.毛巾", "酒店住宿"], ["toiletries", "/tɔɪˈletriz/", "n.洗漱用品", "酒店住宿"], ["shampoo", "/ʃæmˈpuː/", "n.洗发水", "酒店住宿"], ["soap", "/səʊp/", "n.肥皂", "酒店住宿"], ["sink", "/sɪŋk/", "n.洗手池", "酒店住宿"], ["clogged", "/klɒɡd/", "adj.堵塞的", "酒店住宿"], ["plumber", "/ˈplʌmə(r)/", "n.水管工", "酒店住宿"], ["fire alarm", "/ˈfaɪəəˈlɑːm/", "n.火警报警器", "酒店住宿"], ["emergency exit", "/ɪˈmɜːdʒənsiˈeksɪt/", "n.紧急出口", "酒店住宿"], ["library card", "/ˈlaɪbrərikɑːd/", "n.借书证", "图书馆"], ["borrow", "/ˈbɒrəʊ/", "v.借阅", "图书馆"], ["lend", "/lend/", "v.借出", "图书馆"], ["return", "/rɪˈtɜːn/", "v.归还", "图书馆"], ["due date", "/djuːdeɪ/", "n.到期日", "图书馆"], ["renew", "/rɪˈnjuː/", "v.续借", "图书馆"], ["fine", "/faɪn/", "n.罚款", "图书馆"], ["overdue", "/ˌəʊvəˈdjuː/", "adj.逾期的", "图书馆"], ["catalog", "/ˈkætəlɒɡ/", "n.目录", "图书馆"], ["database", "/ˈdeɪtəbeɪs/", "n.数据库", "图书馆"], ["search engine", "/ˈsɜːtʃˈendʒɪn/", "n.搜索引擎", "图书馆"], ["keyword", "/ˈkiːwɜːd/", "n.关键词", "图书馆"], ["scholarly journal", "/ˈskɒləliˈdʒɜːnl/", "n.学术期刊", "图书馆"], ["peer- reviewed", "/ˌpɪərɪˈvjuːd/", "adj.同行评审的", "图书馆"], ["article", "/ˈɑːtɪkl/", "n.文章", "图书馆"], ["book reserve", "/bʊkrɪˈzɜːv/", "n.图书预约", "图书馆"], ["reference book", "/ˈrefrənsbʊk/", "n.参考书", "图书馆"], ["encyclopedia", "/ɪnˌsaɪkləˈpiːdiə/", "n.百科全书", "图书馆"], ["dictionary", "/ˈdɪkʃənri/", "n.词典", "图书馆"], ["thesis", "/ˈθiːsɪs/", "n.论文", "图书馆"], ["dissertation", "/ˌdɪsəˈteɪʃn/", "n.博士论文", "图书馆"], ["archive", "/ˈɑːkaɪv/", "n.档案库", "图书馆"], ["interlibrary loan", "/ˌɪntəˈlaɪbrəriləʊn/", "n.馆际互借", "图书馆"], ["librarian", "/laɪˈbreəriən/", "n.图书管理员", "图书馆"], ["study room", "/ˈstʌdiruːm/", "n.自习室", "图书馆"], ["quiet zone", "/ˈkwaɪətzəʊn/", "n.安静区", "图书馆"], ["copy machine", "/ˈkɒpiməˈʃiːn/", "n.复印机", "图书馆"], ["printer", "/ˈprɪntə(r)/", "n.打印机", "图书馆"], ["scanner", "/ˈskænə(r)/", "n.扫描仪", "图书馆"], ["Wi-Fi", "/ˈwaɪfaɪ/", "n.无线网络", "图书馆"], ["password", "/ˈpɑːswɜːd/", "n.密码", "图书馆"], ["login", "/ˈlɒɡɪn/", "v.&n.登录", "图书馆"], ["username", "/ˈjuːzəneɪm/", "n.用户名", "图书馆"], ["troubleshoot", "/ˈtrʌblʃuːt/", "v.排查故障", "图书馆"], ["malfunction", "/ˌmælˈfʌŋkʃn/", "v.&n.故障", "图书馆"], ["software", "/ˈsɒftweə(r)/", "n.软件", "图书馆"], ["hardware", "/ˈhɑːdweə(r)/", "n.硬件", "图书馆"], ["USB drive", "/ˌjuːesˈbidraɪv/", "n.U盘", "图书馆"], ["cloud storage", "/klaʊdˈstɔːrɪdʒ/", "n.云存储", "图书馆"], ["citation", "/saɪˈteɪʃn/", "n.引用", "图书馆"], ["plagiarism", "/ˈpleɪdʒərɪzəm/", "n.剽窃", "图书馆"], ["bank account", "/bæŋkəˈkaʊnt/", "n.银行账户", "银行业务"], ["deposit", "/dɪˈpɒzɪt/", "v.&n.存款", "银行业务"], ["withdraw", "/wɪðˈdrɔː/", "v.取款", "银行业务"], ["ATM", "/ˌeɪtiːˈem/", "n.自动取款机", "银行业务"], ["debit card", "/ˈdebɪtkɑːd/", "n.借记卡", "银行业务"], ["credit card", "/ˈkredɪtkɑːd/", "n.信用卡", "银行业务"], ["credit limit", "/ˈkredɪtˈlɪmɪt/", "n.信用额度", "银行业务"], ["statement", "/ˈsteɪtmənt/", "n.银行对账单", "银行业务"], ["balance", "/ˈbæləns/", "n.账户余额", "银行业务"], ["overdraft", "/ˈəʊvədraft/", "n.透支", "银行业务"], ["interest", "/ˈɪntrəst/", "n.利息", "银行业务"], ["savings account", "/ˈseɪvɪŋzəˈkaʊnt/", "n.储蓄账户", "银行业务"], ["checking account", "/ˈtʃekɪŋəˈkaʊnt/", "n.支票账户", "银行业务"], ["loan", "/ləʊn/", "n.&v.贷款；借出", "银行业务"], ["mortgage", "/ˈmɔːɡɪdʒ/", "n.抵押贷款", "银行业务"], ["collateral", "/kəˈlætərəl/", "n.抵押品", "银行业务"], ["repay", "/rɪˈpeɪ/", "v.偿还", "银行业务"], ["installment", "/ɪnˈstɔːlmənt/", "n.分期付款", "银行业务"], ["credit score", "/ˈkredɪtskɔː(r)/", "n.信用评分", "银行业务"], ["teller", "/ˈtelə(r)/", "n.银行柜员", "银行业务"], ["manager", "/ˈmænɪdʒə(r)/", "n.银行经理", "银行业务"], ["currency", "/ˈkʌrənsi/", "n.货币", "银行业务"], ["exchange rate", "/ɪksˈtʃeɪndʒreɪt/", "n.汇率", "银行业务"], ["transaction", "/trænˈzækʃn/", "n.交易", "银行业务"], ["pin code", "/ˈpɪnkəʊd/", "n.个人识别码", "银行业务"], ["fraud", "/frɔːd/", "n.诈骗", "银行业务"], ["secure", "/sɪˈkjʊə(r)/", "adj.安全的", "银行业务"], ["online banking", "/ˌɒnˈlaɪnˈbæŋkɪŋ/", "n.网上银行", "银行业务"], ["mobile banking", "/ˈməʊbaɪlˈbæŋkɪŋ/", "n.手机银行", "银行业务"], ["transfer", "/trænsˈfɜː(r)/", "v.&n.转账", "银行业务"], ["wire transfer", "/ˈwaɪətrænsˈfɜː(r)/", "n.电汇", "银行业务"], ["bill payment", "/bɪlˈpeɪmənt/", "n.账单支付", "银行业务"], ["deposit slip", "/dɪˈpɒzɪtslɪp/", "n.存款单", "银行业务"], ["withdrawal slip", "/wɪðˈdrɔːəlslɪp/", "n.取款单", "银行业务"], ["endorsement", "/ɪnˈdɔːsmənt/", "n.背书", "银行业务"], ["ATM fee", "/ˌeɪtiːˈemfiː/", "n.取款机手续费", "银行业务"], ["minimum balance", "/ˈmɪnɪməmˈbæləns/", "n.最低余额", "银行业务"], ["service fee", "/ˈsɜːvɪsfiː/", "n.服务费", "银行业务"], ["registration", "/ˌredʒɪˈstreɪʃn/", "n.课程注册", "课程注册"], ["enroll", "/ɪnˈrəʊl/", "v.选课；入学", "课程注册"], ["course", "/kɔːs/", "n.课程", "课程注册"], ["semester", "/sɪˈmestə(r)/", "n.学期", "课程注册"], ["quarter", "/ˈkwɔːtə(r)/", "n.学季", "课程注册"], ["credit", "/ˈkredɪt/", "n.学分", "课程注册"], ["credit hour", "/ˈkredɪtˈaʊə(r)/", "n.学分学时", "课程注册"], ["prerequisite", "/ˌpriːˈrekwəzɪt/", "n.先修课程", "课程注册"], ["core course", "/kɔː(r)kɔːs/", "n.核心课程", "课程注册"], ["elective", "/ɪˈlektɪv/", "n.选修课", "课程注册"], ["major", "/ˈmeɪdʒə(r)/", "n.专业", "课程注册"], ["minor", "/ˈmaɪnə(r)/", "n.辅修专业", "课程注册"], ["department", "/dɪˈpɑːtmənt/", "n.院系", "课程注册"], ["faculty", "/ˈfæklti/", "n.教职员工", "课程注册"], ["professor", "/prəˈfesə(r)/", "n.教授", "课程注册"], ["instructor", "/ɪnˈstrʌktə(r)/", "n.讲师", "课程注册"], ["syllabus", "/ˈsɪləbəs/", "n.课程大纲", "课程注册"], ["classroom", "/ˈklɑːsruːm/", "n.教室", "课程注册"], ["lecture hall", "/ˈlektʃəhɔːl/", "n.阶梯教室", "课程注册"], ["lab", "/læb/", "n.实验室", "课程注册"], ["tutorial", "/tjuːˈtɔːriəl/", "n.辅导课", "课程注册"], ["workshop", "/ˈwɜːkʃɒp/", "n.研讨班", "课程注册"], ["waitlist", "/ˈweɪtlɪst/", "n.候补名单", "课程注册"], ["drop", "/drɒp/", "v.退课", "课程注册"], ["add", "/æd/", "v.加课", "课程注册"], ["tuition", "/tjuːˈɪʃn/", "n.学费", "课程注册"], ["fee", "/fiː/", "n.费用", "课程注册"], ["scholarship", "/ˈskɒləʃɪp/", "n.奖学金", "课程注册"], ["grant", "/ɡrɑːnt/", "n.助学金", "课程注册"], ["financial aid", "/faɪˈnænʃleɪd/", "n.经济援助", "课程注册"], ["transcript", "/ˈtrænskrɪpt/", "n.成绩单", "课程注册"], ["GPA", "/ˌdʒiːpiːˈeɪ/", "n.平均绩点", "课程注册"], ["pass/fail", "/pɑːs feɪl/", "adj.及格/不及格制", "课程注册"], ["audit", "/ˈɔːdɪt/", "v.旁听", "课程注册"], ["attendance", "/əˈtendəns/", "n.出勤率", "课程注册"], ["participation", "/pɑːˌtɪsɪˈpeɪʃn/", "n.课堂参与", "课程注册"], ["assignment", "/əˈsaɪnmənt/", "n.作业", "课程注册"], ["exam", "/ɪɡˈzæm/", "n.考试", "课程注册"], ["final", "/ˈfaɪnl/", "n.期末考试", "课程注册"], ["quiz", "/kwɪz/", "n.小测验", "课程注册"], ["paper", "/ˈpeɪpə(r)/", "n.论文", "课程注册"], ["online course", "/ˌɒnˈlaɪnkɔːs/", "n.在线课程", "课程注册"], ["symptom", "/ˈsɪmptəm/", "n.症状", "健康医疗"], ["fever", "/ˈfiːvə(r)/", "n.发烧", "健康医疗"], ["cough", "/kɒf/", "v.&n.咳嗽", "健康医疗"], ["cold", "/kəʊld/", "n.感冒", "健康医疗"], ["flu", "/fluː/", "n.流感", "健康医疗"], ["headache", "/ˈhedeɪk/", "n.头痛", "健康医疗"], ["stomachache", "/ˈstʌməkeɪk/", "n.胃痛", "健康医疗"], ["fatigue", "/fəˈtiːɡ/", "n.疲劳", "健康医疗"], ["nausea", "/ˈnɔːziə/", "n.恶心", "健康医疗"], ["vomit", "/ˈvɒmɪt/", "v.&n.呕吐", "健康医疗"], ["diarrhea", "/ˌdaɪəˈriːə/", "n.腹泻", "健康医疗"], ["dehydration", "/ˌdiːhaɪˈdreɪʃn/", "n.脱水", "健康医疗"], ["dizziness", "/ˈdɪzɪnəs/", "n.头晕", "健康医疗"], ["sore throat", "/sɔːθrəʊt/", "n.喉咙痛", "健康医疗"], ["runny nose", "/ˈrʌninəʊz/", "n.流鼻涕", "健康医疗"], ["allergies", "/ˈælədʒiz/", "n.过敏", "健康医疗"], ["pollen", "/ˈpɒlən/", "n.花粉", "健康医疗"], ["rash", "/ræʃ/", "n.皮疹", "健康医疗"], ["itchy", "/ˈɪtʃi/", "adj.发痒的", "健康医疗"], ["infection", "/ɪnˈfekʃn/", "n.感染", "健康医疗"], ["bacteria", "/bækˈtɪəriə/", "n.细菌", "健康医疗"], ["virus", "/ˈvaɪrəs/", "n.病毒", "健康医疗"], ["antibiotics", "/ˌæntibaɪˈɒtɪks/", "n.抗生素", "健康医疗"], ["medicine", "/ˈmedsn/", "n.药物", "健康医疗"], ["prescription", "/prɪˈskrɪpʃn/", "n.处方", "健康医疗"], ["over-the- counter", "/ˌəʊvəðəˈkaʊntə(r)/", "adj.非处方的", "健康医疗"], ["dosage", "/ˈdəʊsɪdʒ/", "n.剂量", "健康医疗"], ["side effect", "/saɪdɪˈfekt/", "n.副作用", "健康医疗"], ["drowsiness", "/ˈdraʊzinəs/", "n.困倦", "健康医疗"], ["doctor", "/ˈdɒktə(r)/", "n.医生", "健康医疗"], ["physician", "/fɪˈzɪʃn/", "n.内科医生", "健康医疗"], ["specialist", "/ˈspeʃəlɪst/", "n.专科医生", "健康医疗"], ["dentist", "/ˈdentɪst/", "n.牙医", "健康医疗"], ["nurse", "/nɜːs/", "n.护士", "健康医疗"], ["clinic", "/ˈklɪnɪk/", "n.诊所", "健康医疗"], ["hospital", "/ˈhɒspɪtl/", "n.医院", "健康医疗"], ["emergency room", "/ɪˈmɜːdʒənsiruːm/", "n.急诊室", "健康医疗"], ["check-up", "/ˈtʃekʌp/", "n.体检", "健康医疗"], ["vaccine", "/ˈvæksiːn/", "n.疫苗", "健康医疗"], ["immunity", "/ɪˈmjuːnəti/", "n.免疫力", "健康医疗"], ["diet", "/ˈdaɪət/", "n.饮食", "健康医疗"], ["nutrition", "/njuːˈtrɪʃn/", "n.营养", "健康医疗"], ["exercise", "/ˈeksəsaɪz/", "n.&v.锻炼", "健康医疗"], ["fitness", "/ˈfɪtnəs/", "n.健康；健身", "健康医疗"], ["stress", "/stres/", "n.压力", "健康医疗"], ["mental health", "/ˈmentlhelθ/", "n.心理健康", "健康医疗"], ["counseling", "/ˈkaʊnslɪŋ/", "n.心理咨询", "健康医疗"], ["sleep", "/sliːp/", "n.&v.睡眠", "健康医疗"], ["wellness", "/ˈwelnəs/", "n.健康养生", "健康医疗"], ["policy", "/ˈpɒləsi/", "n.政策", "校园政策"], ["regulation", "/ˌreɡjuˈleɪʃn/", "n.规章制度", "校园政策"], ["rule", "/ruːl/", "n.规则", "校园政策"], ["code", "/kəʊd/", "n.行为准则", "校园政策"], ["conduct", "/ˈkɒndʌkt/", "n.行为", "校园政策"], ["disciplinary", "/ˈdɪsəplɪnəri/", "adj.纪律的", "校园政策"], ["violation", "/ˌvaɪəˈleɪʃn/", "n.违规", "校园政策"], ["penalty", "/ˈpenəlti/", "n.处罚", "校园政策"], ["suspension", "/səˈspenʃn/", "n.停学", "校园政策"], ["expulsion", "/ɪkˈspʌlʃn/", "n.开除", "校园政策"], ["probation", "/prəˈbeɪʃn/", "n.留校察看", "校园政策"], ["mandatory", "/ˈmændətəri/", "adj.强制性的", "校园政策"], ["optional", "/ˈɒpʃənl/", "adj.可选的", "校园政策"], ["curfew", "/ˈkɜːfjuː/", "n.宵禁", "校园政策"], ["dormitory", "/ˈdɔːmətri/", "n.宿舍", "校园政策"], ["visitor", "/ˈvɪzɪtə(r)/", "n.访客", "校园政策"], ["paraphernalia", "/ˌpærəfəˈneɪliə/", "n.违禁物品", "校园政策"], ["inspection", "/ɪnˈspekʃn/", "n.检查", "校园政策"], ["excused absence", "/ɪkˈskjuːzdˈæbsəns/", "n.请假", "校园政策"], ["academic integrity", "/ˌækəˈdemɪkɪnˈteɡrəti/", "n.学术诚信", "校园政策"], ["tuition waiver", "/tjuːˈɪʃnˈweɪvə(r)/", "n.学费减免", "校园政策"], ["scholarship renewal", "/ˈskɒləʃɪprɪˈnjuːəl/", "n.奖学金续领", "校园政策"], ["campus security", "/ˈkæmpəssɪˈkjʊərəti/", "n.校园安全", "校园政策"], ["emergency protocol", "/ɪˈmɜːdʒənsiˈprəʊtəkɒl/", "n.应急规程", "校园政策"], ["evacuation", "/ɪˌvækjuˈeɪʃn/", "n.疏散", "校园政策"], ["sustainability", "/səˌsteɪnəˈbɪləti/", "n.可持续发展政策", "校园政策"], ["recycling program", "/ˌriːˈsaɪklɪŋˈprəʊɡræm/", "n.回收计划", "校园政策"], ["vehicle registration", "/ˈviːəklˌredʒɪˈstreɪʃn/", "n.车辆登记", "校园政策"], ["parking permit", "/ˈpɑːkɪŋˈpɜːmɪt/", "n.停车许可证", "校园政策"], ["accessibility", "/əkˌsesəˈbɪləti/", "n.无障碍设施政策", "校园政策"], ["disability services", "/ˌdɪsəˈbɪlətiˈsɜːvɪsɪz/", "n.残障服务", "校园政策"], ["pet policy", "/petˈpɒləsi/", "n.宠物政策", "校园政策"], ["service animal", "/ˈsɜːvɪsˈænɪml/", "n.服务型动物", "校园政策"], ["meal plan", "/miːlplæn/", "n.餐卡政策", "校园政策"], ["dining hall", "/ˈdaɪnɪŋhɔːl/", "n.食堂", "校园政策"], ["graduation requirement", "/ˌɡrædʒuˈeɪʃnrɪˈkwaɪəmənt/", "n.毕业要求", "校园政策"], ["orientation", "/ˌɔːriənˈteɪʃn/", "n.新生入学指导", "校园活动"], ["campus tour", "/ˈkæmpəstʊə(r)/", "n.校园参观", "校园活动"], ["club fair", "/klʌbfeə(r)/", "n.社团招新大会", "校园活动"], ["student organization", "/ˈstjuːdntˌɔːɡənaɪˈzeɪʃn/", "n.学生组织", "校园活动"], ["fraternity", "/frəˈtɜːnəti/", "n.兄弟会", "校园活动"], ["sorority", "/səˈrɒrəti/", "n.姐妹会", "校园活动"], ["fundraiser", "/ˈfʌndreɪzə(r)/", "n.筹款活动", "校园活动"], ["charity", "/ˈtʃærəti/", "n.慈善活动", "校园活动"], ["bake sale", "/beɪkseɪl/", "n.烘焙义卖", "校园活动"], ["auction", "/ˈɔːkʃn/", "n.拍卖会", "校园活动"], ["concert", "/ˈkɒnsət/", "n.音乐会", "校园活动"], ["theater", "/ˈθɪətə(r)/", "n.剧院", "校园活动"], ["exhibition", "/ˌeksɪˈbɪʃn/", "n.展览", "校园活动"], ["gallery", "/ˈɡæləri/", "n.画廊", "校园活动"], ["seminar", "/ˈsemɪnɑː(r)/", "n.研讨会", "校园活动"], ["lecture series", "/ˈlektʃəˈsɪəriːz/", "n.系列讲座", "校园活动"], ["guest speaker", "/ɡestˈspiːkə(r)/", "n.客座演讲者", "校园活动"], ["debate", "/dɪˈbeɪt/", "n.辩论赛", "校园活动"], ["sports event", "/ˈspɔːtsɪˈvent/", "n.体育赛事", "校园活动"], ["athletics", "/æθˈletɪks/", "n.体育运动", "校园活动"], ["team spirit", "/tiːmˈspɪrɪt/", "n.团队精神", "校园活动"], ["cheerleading", "/ˈtʃɪəliːdɪŋ/", "n.啦啦队活动", "校园活动"], ["tailgate party", "/ˈteɪlɡeɪtˈpɑːti/", "n.车尾派对", "校园活动"], ["homecoming", "/ˈhəʊmkʌmɪŋ/", "n.返校节", "校园活动"], ["parade", "/pəˈreɪd/", "n.游行", "校园活动"], ["dance", "/dɑːns/", "n.舞会", "校园活动"], ["formal", "/ˈfɔːml/", "adj.正式的", "校园活动"], ["prom", "/prɒm/", "n.毕业舞会", "校园活动"], ["catering", "/ˈkeɪtərɪŋ/", "n.餐饮服务", "校园活动"], ["graduation ceremony", "/ˌɡrædʒuˈeɪʃnˈserəməni/", "n.毕业典礼", "校园活动"], ["commencement speech", "/kəˈmensməntspiːtʃ/", "n.毕业致辞", "校园活动"], ["alumni", "/əˈlʌmnaɪ/", "n.校友", "校园活动"], ["field trip", "/fiːldtrɪp/", "n.实地考察", "校园活动"], ["volunteer activity", "/ˌvɒlənˈtɪəækˈtɪvəti/", "n.志愿活动", "校园活动"], ["potluck", "/ˈpɒtlʌk/", "n.百乐餐", "校园活动"], ["movie night", "/ˈmuːvinaɪt/", "n.电影之夜", "校园活动"], ["game night", "/ɡeɪmnaɪt/", "n.游戏之夜", "校园活动"], ["picnic", "/ˈpɪknɪk/", "n.野餐", "校园活动"], ["cultural festival", "/ˈkʌltʃərəlˈfestɪvl/", "n.文化节", "校园活动"], ["talent show", "/ˈtæləntʃəʊ/", "n.才艺表演", "校园活动"], ["karaoke night", "/ˌkæriˈəʊkinaɪt/", "n.卡拉OK之夜", "校园活动"], ["psychology", "/saɪˈkɒlədʒi/", "n.心理学", "心理学"], ["cognition", "/kɒɡˈnɪʃn/", "n.认知", "心理学"], ["perception", "/pəˈsepʃn/", "n.感知", "心理学"], ["attention", "/əˈtenʃn/", "n.注意力", "心理学"], ["memory", "/ˈmeməri/", "n.记忆", "心理学"], ["short-term memory", "/ˌʃɔːttɜːmˈmeməri/", "n.短时记忆", "心理学"], ["long-term memory", "/ˌlɒŋtɜːmˈmeməri/", "n.长时记忆", "心理学"], ["recall", "/rɪˈkɔːl/", "v.回忆", "心理学"], ["recognition", "/ˌrekəɡˈnɪʃn/", "n.识别", "心理学"], ["learning", "/ˈlɜːnɪŋ/", "n.学习", "心理学"], ["conditioning", "/kənˈdɪʃənɪŋ/", "n.条件作用", "心理学"], ["reinforcement", "/ˌriːɪnˈfɔːsmənt/", "n.强化", "心理学"], ["behavior", "/bɪˈheɪvjə(r)/", "n.行为", "心理学"], ["motivation", "/ˌməʊtɪˈveɪʃn/", "n.动机", "心理学"], ["emotion", "/ɪˈməʊʃn/", "n.情绪", "心理学"], ["mood", "/muːd/", "n.心境", "心理学"], ["personality", "/ˌpɜːsəˈnæləti/", "n.人格", "心理学"], ["extroversion", "/ˌekstrəˈvɜːʃn/", "n.外向性", "心理学"], ["introversion", "/ˌɪntrəˈvɜːʃn/", "n.内向性", "心理学"], ["intelligence", "/ɪnˈtelɪdʒəns/", "n.智力", "心理学"], ["IQ", "/ˌaɪˈkjuː/", "n.智商", "心理学"], ["creativity", "/ˌkriːeɪˈtɪvəti/", "n.创造力", "心理学"], ["problem- solving", "/ˈprɒbləmˌsɒlvɪŋ/", "n.问题解决", "心理学"], ["decision- making", "/dɪˈsɪʒnˌmeɪkɪŋ/", "n.决策", "心理学"], ["intuition", "/ˌɪntjuˈɪʃn/", "n.直觉", "心理学"], ["anxiety", "/æŋˈzaɪəti/", "n.焦虑", "心理学"], ["depression", "/dɪˈpreʃn/", "n.抑郁", "心理学"], ["therapy", "/ˈθerəpi/", "n.治疗", "心理学"], ["empathy", "/ˈempəθi/", "n.共情", "心理学"], ["sympathy", "/ˈsɪmpəθi/", "n.同情", "心理学"], ["self-esteem", "/ˌselfɪˈstiːm/", "n.自尊", "心理学"], ["self-efficacy", "/ˌselfˈefɪkəsi/", "n.自我效能感", "心理学"], ["social psychology", "/ˈsəʊʃlsaɪˈkɒlədʒi/", "n.社会心理学", "心理学"], ["conformity", "/kənˈfɔːməti/", "n.从众", "心理学"], ["obedience", "/əˈbiːdiəns/", "n.服从", "心理学"], ["group dynamics", "/ɡruːpdaɪˈnæmɪks/", "n.群体动力学", "心理学"], ["prejudice", "/ˈpredʒudɪs/", "n.偏见", "心理学"], ["stereotype", "/ˈsteriətaɪp/", "n.刻板印象", "心理学"], ["attitude", "/ˈætɪtjuːd/", "n.态度", "心理学"], ["persuasion", "/pəˈsweɪʒn/", "n.说服", "心理学"], ["altruism", "/ˈæltruɪzəm/", "n.利他主义", "心理学"], ["aggression", "/əˈɡreʃn/", "n.攻击性", "心理学"], ["frustration", "/frʌˈstreɪʃn/", "n.挫折感", "心理学"], ["art", "/ɑːt/", "n.艺术", "艺术"], ["painting", "/ˈpeɪntɪŋ/", "n.绘画", "艺术"], ["sculpture", "/ˈskʌlptʃə(r)/", "n.雕塑", "艺术"], ["drawing", "/ˈdrɔːɪŋ/", "n.素描", "艺术"], ["sketch", "/sketʃ/", "n.草图", "艺术"], ["portrait", "/ˈpɔːtreɪt/", "n.肖像画", "艺术"], ["landscape", "/ˈlændskeɪp/", "n.风景画", "艺术"], ["still life", "/stɪllaɪf/", "n.静物画", "艺术"], ["abstract art", "/ˈæbstræktɑːt/", "n.抽象艺术", "艺术"], ["realism", "/ˈriːəlɪzəm/", "n.现实主义", "艺术"], ["impressionism", "/ɪmˈpreʃnɪzəm/", "n.印象派", "艺术"], ["surrealism", "/səˈriːəlɪzəm/", "n.超现实主义", "艺术"], ["artist", "/ˈɑːtɪst/", "n.艺术家", "艺术"], ["museum", "/mjuˈziːəm/", "n.博物馆", "艺术"], ["calligraphy", "/kəˈlɪɡrəfi/", "n.书法", "艺术"], ["craft", "/krɑːft/", "n.手工艺", "艺术"], ["pottery", "/ˈpɒtəri/", "n.陶器", "艺术"], ["textile", "/ˈtekstaɪl/", "n.纺织品", "艺术"], ["weaving", "/ˈwiːvɪŋ/", "n.编织术", "艺术"], ["knitting", "/ˈnɪtɪŋ/", "n.针织术", "艺术"], ["jewelry", "/ˈdʒuːəlri/", "n.珠宝", "艺术"], ["architecture", "/ˈɑːkɪtektʃə(r)/", "n.建筑艺术", "艺术"], ["design", "/dɪˈzaɪn/", "n.&v.设计", "艺术"], ["aesthetics", "/iːsˈθetɪks/", "n.美学", "艺术"], ["composition", "/ˌkɒmpəˈzɪʃn/", "n.构图", "艺术"], ["color palette", "/ˈkʌləˈpælət/", "n.调色板；色彩搭配", "艺术"], ["texture", "/ˈtekstʃə(r)/", "n.质感", "艺术"], ["medium", "/ˈmiːdiəm/", "n.艺术媒介", "艺术"], ["oil painting", "/ɔɪlˈpeɪntɪŋ/", "n.油画", "艺术"], ["watercolor", "/ˈwɔːtəkʌlə(r)/", "n.水彩画", "艺术"], ["acrylic", "/əˈkrɪlɪk/", "n.丙烯画", "艺术"], ["printmaking", "/ˈprɪntmeɪkɪŋ/", "n.版画制作", "艺术"], ["woodcut", "/ˈwʊdkʌt/", "n.木刻版画", "艺术"], ["photography", "/fəˈtɒɡrəfi/", "n.摄影艺术", "艺术"], ["digital art", "/ˈdɪdʒɪtlɑːt/", "n.数字艺术", "艺术"], ["animation", "/ˌænɪˈmeɪʃn/", "n.动画艺术", "艺术"], ["performance art", "/pəˈfɔːmənsɑːt/", "n.行为艺术", "艺术"], ["installation art", "/ˌɪnstəˈleɪʃnɑːt/", "n.装置艺术", "艺术"], ["geology", "/dʒiˈɒlədʒi/", "n.地质学", "地球科学"], ["geologist", "/dʒiˈɒlədʒɪst/", "n.地质学家", "地球科学"], ["earthquake", "/ˈɜːθkweɪk/", "n.地震", "地球科学"], ["tectonic plates", "/tekˈtɒnɪkpleɪts/", "n.地壳板块", "地球科学"], ["volcano", "/vɒlˈkeɪnəʊ/", "n.火山", "地球科学"], ["eruption", "/ɪˈrʌpʃn/", "n.火山喷发", "地球科学"], ["lava", "/ˈlɑːvə/", "n.熔岩", "地球科学"], ["magma", "/ˈmæɡmə/", "n.岩浆", "地球科学"], ["erosion", "/ɪˈrəʊʒn/", "n.侵蚀", "地球科学"], ["weathering", "/ˈweðərɪŋ/", "n.风化", "地球科学"], ["sediment", "/ˈsedɪmənt/", "n.沉积物", "地球科学"], ["fossil", "/ˈfɒsl/", "n.化石", "地球科学"], ["paleontology", "/ˌpeɪliɒnˈtɒlədʒi/", "n.古生物学", "地球科学"], ["rock", "/rɒk/", "n.岩石", "地球科学"], ["igneous rock", "/ˈɪɡniəsrɒk/", "n.火成岩", "地球科学"], ["sedimentary rock", "/ˌsedɪˈmentrirɒk/", "n.沉积岩", "地球科学"], ["metamorphic rock", "/ˌmetəˈmɔːfɪkrɒk/", "n.变质岩", "地球科学"], ["mineral", "/ˈmɪnərəl/", "n.矿物", "地球科学"], ["crust", "/krʌst/", "n.地壳", "地球科学"], ["mantle", "/ˈmæntl/", "n.地幔", "地球科学"], ["core", "/kɔː(r)/", "n.地核", "地球科学"], ["continental drift", "/ˌkɒntɪˈnentldrɪft/", "n.大陆漂移说", "地球科学"], ["landform", "/ˈlændfɔːm/", "n.地形", "地球科学"], ["mountain range", "/ˈmaʊntənreɪndʒ/", "n.山脉", "地球科学"], ["valley", "/ˈvæli/", "n.山谷", "地球科学"], ["plain", "/pleɪn/", "n.平原", "地球科学"], ["desert", "/ˈdezət/", "n.沙漠", "地球科学"], ["ocean", "/ˈəʊʃn/", "n.海洋", "地球科学"], ["ocean floor", "/ˈəʊʃnflɔː(r)/", "n.洋底", "地球科学"], ["trench", "/trentʃ/", "n.海沟", "地球科学"], ["ridge", "/rɪdʒ/", "n.海岭", "地球科学"], ["tsunami", "/tsuːˈnɑːmi/", "n.海啸", "地球科学"], ["glacier", "/ˈɡlæsiə(r)/", "n.冰川", "地球科学"], ["ice age", "/aɪseɪdʒ/", "n.冰河时代", "地球科学"], ["landslide", "/ˈlændslaɪd/", "n.山体滑坡", "地球科学"], ["groundwater", "/ˈɡraʊndwɔːtə(r)/", "n.地下水", "地球科学"], ["aquifer", "/ˈækwɪfə(r)/", "n.含水层", "地球科学"], ["geothermal", "/ˌdʒiːəʊˈθɜːml/", "adj.地热的", "地球科学"], ["fault", "/fɔːlt/", "n.断层", "地球科学"], ["deposition", "/ˌdepəˈzɪʃn/", "n.沉积", "地球科学"], ["delta", "/ˈdeltə/", "n.三角洲", "地球科学"], ["erosional", "/ɪˈrəʊʒənl/", "adj.侵蚀的", "地球科学"], ["topography", "/təˈpɒɡrəfi/", "n.地形学", "地球科学"], ["elevation", "/ˌelɪˈveɪʃn/", "n.海拔", "地球科学"], ["ecology", "/iːˈkɒlədʒi/", "n.生态学", "生态"], ["ecosystem", "/ˈiːkəʊsɪstəm/", "n.生态系统", "生态"], ["ecologist", "/iːˈkɒlədʒɪst/", "n.生态学家", "生态"], ["organism", "/ˈɔːɡənɪzəm/", "n.生物；有机体", "生态"], ["community", "/kəˈmjuːnəti/", "n.生物群落", "生态"], ["population", "/ˌpɒpjuˈleɪʃn/", "n.种群", "生态"], ["species", "/ˈspiːʃiːz/", "n.物种", "生态"], ["habitat", "/ˈhæbɪtæt/", "n.栖息地", "生态"], ["niche", "/nɪtʃ/", "n.生态位", "生态"], ["producer", "/prəˈdjuːsə(r)/", "n.生产者", "生态"], ["consumer", "/kənˈsjuːmə(r)/", "n.消费者", "生态"], ["herbivore", "/ˈhɜːbɪvɔː(r)/", "n.食草动物", "生态"], ["carnivore", "/ˈkɑːnɪvɔː(r)/", "n.食肉动物", "生态"], ["omnivore", "/ˈɒmnɪvɔː(r)/", "n.杂食动物", "生态"], ["decomposer", "/ˌdiːkəmˈpəʊzə(r)/", "n.分解者", "生态"], ["food chain", "/fuːdtʃeɪn/", "n.食物链", "生态"], ["food web", "/fuːdweb/", "n.食物网", "生态"], ["trophic level", "/ˈtrɒfɪkˈlevl/", "n.营养级", "生态"], ["predator", "/ˈpredətə(r)/", "n.捕食者", "生态"], ["prey", "/preɪ/", "n.猎物", "生态"], ["symbiosis", "/ˌsɪmbaɪˈəʊsɪs/", "n.共生", "生态"], ["mutualism", "/ˈmjuːtʃuəlɪzəm/", "n.互利共生", "生态"], ["commensalism", "/kəˈmensəlɪzəm/", "n.偏利共生", "生态"], ["parasitism", "/ˈpærəsaɪtɪzəm/", "n.寄生", "生态"], ["parasite", "/ˈpærəsaɪt/", "n.寄生虫", "生态"], ["resource", "/rɪˈsɔːs/", "n.资源", "生态"], ["biodiversity", "/ˌbaɪəʊdaɪˈvɜːsəti/", "n.生物多样性", "生态"], ["conservation", "/ˌkɒnsəˈveɪʃn/", "n.保护", "生态"], ["extinction", "/ɪkˈstɪŋkʃn/", "n.灭绝", "生态"], ["endangered", "/ɪnˈdeɪndʒəd/", "adj.濒危的", "生态"], ["threatened", "/ˈθretnd/", "adj.受威胁的", "生态"], ["pollution", "/pəˈluːʃn/", "n.污染", "生态"], ["deforestation", "/ˌdiːˌfɒrɪˈsteɪʃn/", "n.森林砍伐", "生态"], ["desertification", "/dɪˌzɜːtɪfɪˈkeɪʃn/", "n.沙漠化", "生态"], ["eutrophication", "/ˌjuːtrəfɪˈkeɪʃn/", "n.富营养化", "生态"], ["algal bloom", "/ˈælɡlbluːm/", "n.水华；藻华", "生态"], ["renewable", "/rɪˈnjuːəbl/", "adj.可再生的", "生态"], ["non-renewable", "/ˌnɒnrɪˈnjuːəbl/", "adj.不可再生的", "生态"], ["biology", "/baɪˈɒlədʒi/", "n.生物学", "生物"], ["cell", "/sel/", "n.细胞", "生物"], ["cell membrane", "/selˈmembreɪn/", "n.细胞膜", "生物"], ["nucleus", "/ˈnjuːkliəs/", "n.细胞核", "生物"], ["DNA", "/ˌdiːenˈeɪ/", "n.脱氧核糖核酸", "生物"], ["gene", "/dʒiːn/", "n.基因", "生物"], ["chromosome", "/ˈkrəʊməsəʊm/", "n.染色体", "生物"], ["tissue", "/ˈtɪʃuː/", "n.组织", "生物"], ["organ", "/ˈɔːɡən/", "n.器官", "生物"], ["organ system", "/ˈɔːɡənˈsɪstəm/", "n.器官系统", "生物"], ["metabolism", "/məˈtæbəlɪzəm/", "n.新陈代谢", "生物"], ["photosynthesis", "/ˌfəʊtəʊˈsɪnθəsɪs/", "n.光合作用", "生物"], ["respiration", "/ˌrespəˈreɪʃn/", "n.呼吸作用", "生物"], ["mitosis", "/maɪˈtəʊsɪs/", "n.有丝分裂", "生物"], ["meiosis", "/maɪˈəʊsɪs/", "n.减数分裂", "生物"], ["gamete", "/ˈɡæmiːt/", "n.配子", "生物"], ["fertilization", "/ˌfɜːtəlaɪˈzeɪʃn/", "n.受精", "生物"], ["zygote", "/ˈzaɪɡəʊt/", "n.受精卵", "生物"], ["embryo", "/ˈembriəʊ/", "n.胚胎", "生物"], ["evolution", "/ˌiːvəˈluːʃn/", "n.进化", "生物"], ["natural selection", "/ˈnætʃrəlsɪˈlekʃn/", "n.自然选择", "生物"], ["adaptation", "/ˌædæpˈteɪʃn/", "n.适应", "生物"], ["mutation", "/mjuːˈteɪʃn/", "n.突变", "生物"], ["taxonomy", "/tækˈsɒnəmi/", "n.生物分类学", "生物"], ["kingdom", "/ˈkɪŋdəm/", "n.界", "生物"], ["vertebrate", "/ˈvɜːtɪbrət/", "n.脊椎动物", "生物"], ["invertebrate", "/ɪnˈvɜːtɪbrət/", "n.无脊椎动物", "生物"], ["mammal", "/ˈmæml/", "n.哺乳动物", "生物"], ["reptile", "/ˈreptaɪl/", "n.爬行动物", "生物"], ["amphibian", "/æmˈfɪbiən/", "n.两栖动物", "生物"], ["metamorphosis", "/ˌmetəˈmɔːfəsɪs/", "n.变态发育", "生物"], ["fungi", "/ˈfʌndʒaɪ/", "n.真菌", "生物"], ["immune system", "/ɪˈmjuːnˈsɪstəm/", "n.免疫系统", "生物"], ["antibody", "/ˈæntibɒdi/", "n.抗体", "生物"], ["antigen", "/ˈæntɪdʒən/", "n.抗原", "生物"], ["homeostasis", "/ˌhəʊmiəʊˈsteɪsɪs/", "n.稳态", "生物"], ["hormone", "/ˈhɔːməʊn/", "n.激素", "生物"], ["enzyme", "/ˈenzaɪm/", "n.酶", "生物"], ["protein", "/ˈprəʊtiːn/", "n.蛋白质", "生物"], ["carbohydrate", "/ˌkɑːbəʊˈhaɪdreɪt/", "n.碳水化合物", "生物"], ["lipid", "/ˈlɪpɪd/", "n.脂质", "生物"], ["astronomy", "/əˈstrɒnəmi/", "n.天文学", "天文"], ["astronomer", "/əˈstrɒnəmə(r)/", "n.天文学家", "天文"], ["celestial", "/səˈlestɪəl/", "adj.天体的", "天文"], ["star", "/stɑː(r)/", "n.恒星", "天文"], ["planet", "/ˈplænɪt/", "n.行星", "天文"], ["solar system", "/ˈsəʊləˈsɪstəm/", "n.太阳系", "天文"], ["orbit", "/ˈɔːbɪt/", "v.&n.轨道；绕转", "天文"], ["moon", "/muːn/", "n.卫星；月球", "天文"], ["satellite", "/ˈsætəlaɪt/", "n.卫星", "天文"], ["asteroid", "/ˈæstərɔɪd/", "n.小行星", "天文"], ["comet", "/ˈkɒmɪt/", "n.彗星", "天文"], ["meteor", "/ˈmiːtiə(r)/", "n.流星", "天文"], ["meteorite", "/ˈmiːtiəraɪt/", "n.陨石", "天文"], ["galaxy", "/ˈɡæləksi/", "n.星系", "天文"], ["Milky Way", "/ˈmɪlkiweɪ/", "n.银河系", "天文"], ["constellation", "/ˌkɒnstəˈleɪʃn/", "n.星座", "天文"], ["nebula", "/ˈnebjələ/", "n.星云", "天文"], ["black hole", "/blækhəʊl/", "n.黑洞", "天文"], ["supernova", "/ˌsuːpəˈnəʊvə/", "n.超新星", "天文"], ["pulsar", "/ˈpʌlsɑː(r)/", "n.脉冲星", "天文"], ["neutron star", "/ˈnjuːtrɒnstɑː(r)/", "n.中子星", "天文"], ["gravity", "/ˈɡrævəti/", "n.引力", "天文"], ["cosmos", "/ˈkɒzmɒs/", "n.宇宙", "天文"], ["Big Bang", "/bɪɡbæŋ/", "n.宇宙大爆炸", "天文"], ["expansion", "/ɪkˈspænʃn/", "n.膨胀", "天文"], ["dark matter", "/dɑːkˈmætə(r)/", "n.暗物质", "天文"], ["dark energy", "/dɑːkˈenədʒi/", "n.暗能量", "天文"], ["telescope", "/ˈtelɪskəʊp/", "n.望远镜", "天文"], ["observatory", "/əbˈzɜːvətri/", "n.天文台", "天文"], ["light-year", "/ˈlaɪtjɪə(r)/", "n.光年", "天文"], ["astronaut", "/ˈæstrənɔːt/", "n.宇航员", "天文"], ["spacecraft", "/ˈspeɪskrɑːft/", "n.航天器", "天文"], ["launch", "/lɔːntʃ/", "v.发射", "天文"], ["atmosphere", "/ˈætməsfɪə(r)/", "n.大气层", "天文"], ["radiation", "/ˌreɪdiˈeɪʃn/", "n.辐射", "天文"], ["eclipse", "/ɪˈklɪps/", "n.日食；月食", "天文"], ["solar eclipse", "/ˈsəʊləɪˈklɪps/", "n.日食", "天文"], ["lunar eclipse", "/ˈluːnəɪˈklɪps/", "n.月食", "天文"], ["equinox", "/ˈiːkwɪnɒks/", "n.春分；秋分", "天文"], ["solstice", "/ˈsɒlstɪs/", "n.夏至；冬至", "天文"], ["history", "/ˈhɪstri/", "n.历史", "历史"], ["historian", "/hɪˈstɔːriən/", "n.历史学家", "历史"], ["civilization", "/ˌsɪvəlaɪˈzeɪʃn/", "n.文明", "历史"], ["ancient", "/ˈeɪnʃənt/", "adj.古代的", "历史"], ["empire", "/ˈempaɪə(r)/", "n.帝国", "历史"], ["dynasty", "/ˈdɪnəsti/", "n.朝代", "历史"], ["monarch", "/ˈmɒnək/", "n.君主", "历史"], ["king", "/kɪŋ/", "n.国王", "历史"], ["queen", "/kwiːn/", "n.女王", "历史"], ["pharaoh", "/ˈfeərəʊ/", "n.法老", "历史"], ["revolution", "/ˌrevəˈluːʃn/", "n.革命", "历史"], ["war", "/wɔː(r)/", "n.战争", "历史"], ["battle", "/ˈbætl/", "n.战役", "历史"], ["treaty", "/ˈtriːti/", "n.条约", "历史"], ["alliance", "/əˈlaɪəns/", "n.联盟", "历史"], ["colony", "/ˈkɒləni/", "n.殖民地", "历史"], ["independence", "/ˌɪndɪˈpendəns/", "n.独立", "历史"], ["constitution", "/ˌkɒnstɪˈtjuːʃn/", "n.宪法", "历史"], ["democracy", "/dɪˈmɒkrəsi/", "n.民主", "历史"], ["dictatorship", "/ˌdɪkˈteɪtəʃɪp/", "n.独裁统治", "历史"], ["archaeology", "/ˌɑːkiˈɒlədʒi/", "n.考古学", "历史"], ["archaeologist", "/ˌɑːkiˈɒlədʒɪst/", "n.考古学家", "历史"], ["artifact", "/ˈɑːtɪfækt/", "n.文物", "历史"], ["excavation", "/ˌekskəˈveɪʃn/", "n.挖掘", "历史"], ["ruin", "/ˈruːɪn/", "n.遗迹", "历史"], ["manuscript", "/ˈmænjuskrɪpt/", "n.手稿", "历史"], ["document", "/ˈdɒkjumənt/", "n.文件", "历史"], ["era", "/ˈɪərə/", "n.时代", "历史"], ["period", "/ˈpɪəriəd/", "n.时期", "历史"], ["middle ages", "/ˈmɪdleɪdʒɪz/", "n.中世纪", "历史"], ["renaissance", "/rɪˈneɪsns/", "n.文艺复兴", "历史"], ["industrial revolution", "/ɪnˈdʌstriəlˌrevəˈluːʃn/", "n.工业革命", "历史"], ["invention", "/ɪnˈvenʃn/", "n.发明", "历史"], ["exploration", "/ˌekspləˈreɪʃn/", "n.探险", "历史"], ["explorer", "/ɪkˈsplɔːrə(r)/", "n.探险家", "历史"], ["migration", "/maɪˈɡreɪʃn/", "n.迁徙", "历史"], ["culture", "/ˈkʌltʃə(r)/", "n.文化", "历史"], ["tradition", "/trəˈdɪʃn/", "n.传统", "历史"], ["heritage", "/ˈherɪtɪdʒ/", "n.遗产", "历史"], ["legacy", "/ˈleɡəsi/", "n.遗产；遗留物", "历史"], ["reformation", "/ˌrefəˈmeɪʃn/", "n.宗教改革", "历史"], ["philosophy", "/fəˈlɒsəfi/", "n.哲学", "历史"], ["philosopher", "/fəˈlɒsəfə(r)/", "n.哲学家", "历史"], ["religion", "/rɪˈlɪdʒən/", "n.宗教", "历史"], ["mythology", "/mɪˈθɒlədʒi/", "n.神话", "历史"], ["legend", "/ˈledʒənd/", "n.传说", "历史"], ["folklore", "/ˈfəʊklɔː(r)/", "n.民间传说", "历史"], ["custom", "/ˈkʌstəm/", "n.习俗", "历史"], ["ritual", "/ˈrɪtʃuəl/", "n.仪式", "历史"], ["environmental science", "/ɪnˌvaɪrənˈmentlˈsaɪəns/", "n.环境科学", "环境科学"], ["climate change", "/ˈklaɪməttʃeɪndʒ/", "n.气候变化", "环境科学"], ["greenhouse effect", "/ˈɡriːnhaʊsɪˈfekt/", "n.温室效应", "环境科学"], ["greenhouse gases", "/ˈɡriːnhaʊsˈɡæsɪz/", "n.温室气体", "环境科学"], ["global warming", "/ˈɡləʊblˈwɔːmɪŋ/", "n.全球变暖", "环境科学"], ["carbon dioxide", "/ˈkɑːbəndaɪˈɒksaɪd/", "n.二氧化碳", "环境科学"], ["carbon footprint", "/ˈkɑːbənˈfʊtprɪnt/", "n.碳足迹", "环境科学"], ["conservationist", "/ˌkɒnsəˈveɪʃnɪst/", "n.环保人士；自然资源保护者", "环境科学"], ["carbon neutral", "/ˈkɑːbənˈnjuːtrəl/", "adj.碳中和的", "环境科学"], ["environmental protection", "/ɪnˌvaɪrənˈmentlprəˈtekʃn/", "n.环境保护", "环境科学"]];
+
+/* ---------- 工具 ---------- */
+function el(id){return document.getElementById(id)}
+function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t}return a}
+function norm(s){return s.toLowerCase().replace(/[’]/g,"'").replace(/[^a-z']/g,"")}
+function speak(w){try{var u=new SpeechSynthesisUtterance(w.replace(/\//g," "));u.lang="en-US";u.rate=0.88;speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){}}
+function loadWrong(){try{return JSON.parse(localStorage.getItem("tb8_wrong")||"{}")}catch(e){return{}}}
+function saveWrong(w){localStorage.setItem("tb8_wrong",JSON.stringify(w))}
+function addWrong(item){var w=loadWrong();w[item[0]]={ph:item[1],m:item[2],t:item[3],ts:Date.now()};saveWrong(w);refreshWrongCount()}
+function removeWrong(word){var w=loadWrong();delete w[word];saveWrong(w);refreshWrongCount()}
+function refreshWrongCount(){var n=Object.keys(loadWrong()).length;el("wrongCount").textContent=n+" 词待复习"}
+function getBest(k){return parseInt(localStorage.getItem(k)||"0")}
+function setBest(k,v){if(v>getBest(k))localStorage.setItem(k,v)}
+function refreshBest(){el("bestLine").textContent="历史最佳：闯关 "+getBest("tb8_best_spell")+" 分 · 快答 "+getBest("tb8_best_quiz")+" 分"}
+
+/* ---------- 首页 ---------- */
+var selectedMode="spell";
+var selectedTopics={};
+(function(){
+  var wrap=el("topicChips");
+  var all=document.createElement("button");all.className="chip on";all.textContent="全部话题";all.dataset.t="__all";
+  wrap.appendChild(all);
+  TOPICS.forEach(function(t){
+    var c=document.createElement("button");c.className="chip";c.textContent=t;c.dataset.t=t;
+    wrap.appendChild(c);
+  });
+  wrap.onclick=function(e){
+    var t=e.target.dataset&&e.target.dataset.t;if(!t)return;
+    if(t==="__all"){
+      var on=all.classList.contains("on");
+      all.classList.toggle("on");
+      wrap.querySelectorAll(".chip").forEach(function(c){if(c.dataset.t!=="__all"){c.classList.toggle("on",!on);selectedTopics[c.dataset.t]=!on}});
+      if(!on)Object.keys(selectedTopics).forEach(function(k){selectedTopics[k]=true});
+    }else{
+      e.target.classList.toggle("on");
+      selectedTopics[t]=e.target.classList.contains("on");
+      var allOn=true;wrap.querySelectorAll(".chip").forEach(function(c){if(c.dataset.t!=="__all"&&!c.classList.contains("on"))allOn=false});
+      all.classList.toggle("on",allOn);
+    }
+  };
+})();
+document.querySelectorAll(".mode").forEach(function(m){
+  m.onclick=function(){
+    document.querySelectorAll(".mode").forEach(function(x){x.classList.remove("sel")});
+    m.classList.add("sel");selectedMode=m.dataset.mode;
+  };
+});
+el("startBtn").onclick=function(){
+  if(selectedMode==="review"){
+    var w=loadWrong();var keys=Object.keys(w);
+    if(!keys.length){alert("错词本是空的，先去闯几关吧！");return}
+    var pool=keys.map(function(k){return [k,w[k].ph,w[k].m,w[k].t]});
+    startSpell(pool,true);
+  }else{
+    var pool=DATA.filter(function(d){return selectedTopics[d[3]]!==false});
+    if(!pool.length)pool=DATA.slice();
+    if(selectedMode==="spell")startSpell(shuffle(pool.slice()),false);
+    else startQuiz(shuffle(pool.slice()));
+  }
+};
+
+/* ---------- 闯关（拼写） ---------- */
+var S={};
+function startSpell(pool,isReview){
+  S={pool:pool,i:0,score:0,streak:0,hearts:3,answered:0,correct:0,wrong:[],locked:false,review:isReview,hintUsed:false};
+  el("home").style.display="none";el("result").style.display="none";el("game").style.display="block";
+  el("quizArea").style.display="none";el("spellArea").style.display="block";
+  el("timerWrap").style.display="none";el("progWrap").style.display="block";
+  el("gHintBtn").style.display=isReview?"none":"inline-block";
+  el("gSkip").textContent=isReview?"暂时跳过":"认识，跳过";
+  renderSpell();
+}
+function renderSpell(){
+  S.locked=false;S.hintUsed=false;
+  var d=S.pool[S.i];
+  el("hudLeft").innerHTML="第 <b>"+(S.i+1)+"</b> / "+S.pool.length+" 题";
+  el("hudRight").innerHTML="得分 <b>"+S.score+"</b>";
+  el("hudHearts").textContent=S.review?"复习模式":"♥".repeat(S.hearts)+"♡".repeat(Math.max(0,3-S.hearts));
+  el("prog").style.width=(S.i/S.pool.length*100)+"%";
+  el("combo").textContent=S.streak>=2?"连击 ×"+S.streak+"　(+"+Math.round(10*(1+S.streak*0.15))+" 分/题)":"";
+  el("gMean").textContent=d[2];
+  el("gPos").textContent=d[1]+"　·　"+d[3];
+  el("gHint").textContent=d[0].replace(/[A-Za-z]/g,"_").split("").join(" ");
+  el("gFb").innerHTML="";
+  var inp=el("gInput");inp.value="";inp.className="";inp.disabled=false;inp.focus();
+}
+function spellAnswer(skipped){
+  if(S.locked)return;S.locked=true;
+  var d=S.pool[S.i],inp=el("gInput"),val=norm(inp.value),target=norm(d[0]);
+  inp.disabled=true;
+  if(!skipped&&val===target){
+    S.streak++;var pts=Math.round(10*(1+(S.streak-1)*0.15))-(S.hintUsed?2:0);pts=Math.max(1,pts);
+    S.score+=pts;S.correct++;S.answered++;
+    inp.className="ok";el("gFb").innerHTML='<span class="ok">正确！+'+pts+' 分</span>';
+    if(S.review)removeWrong(d[0]);
+    var cb=el("combo");cb.classList.remove("pop");void cb.offsetWidth;cb.classList.add("pop");
+    setTimeout(nextSpell,850);
+  }else{
+    S.streak=0;S.answered++;if(!S.review)S.hearts--;
+    S.wrong.push(d);addWrong(d);
+    inp.className="bad";inp.value=d[0];
+    el("gFb").innerHTML='<span class="bad">'+(skipped?"没关系，答案是：":"拼写有误，正确：")+'<b>'+d[0]+'</b></span>';
+    el("gInput").classList.add("shake");
+    el("hudHearts").textContent=S.review?"复习模式":"♥".repeat(Math.max(0,S.hearts))+"♡".repeat(3-Math.max(0,S.hearts));
+    if(!S.review&&S.hearts<=0){setTimeout(function(){showResult(false)},1600);return}
+    setTimeout(nextSpell,1700);
+  }
+}
+function nextSpell(){
+  S.i++;
+  if(S.i>=S.pool.length){showResult(true);return}
+  renderSpell();
+}
+el("gSubmit").onclick=function(){spellAnswer(false)};
+el("gInput").addEventListener("keydown",function(e){if(e.key==="Enter")spellAnswer(false)});
+el("gSkip").onclick=function(){if(S.locked)return;S.locked=true;var d=S.pool[S.i];S.answered++;S.streak=0;
+  el("gFb").innerHTML='<span style="color:#999">已跳过：'+d[0]+'（'+d[2]+'）</span>';speak(d[0]);
+  setTimeout(nextSpell,1100)};
+el("gHintBtn").onclick=function(){if(S.locked||S.hintUsed)return;S.hintUsed=true;
+  var d=S.pool[S.i];
+  el("gHint").textContent=d[0].split("").map(function(ch,i){return /[A-Za-z]/.test(ch)?(i===0||d[0][i-1]===" "||d[0][i-1]==="-"||d[0][i-1]==="/"?ch:"_"):ch}).join(" ");
+  el("gHintBtn").textContent="已用提示 (-2分)";el("gHintBtn").disabled=true;
+  setTimeout(function(){el("gHintBtn").textContent="提示首字母"},1500)};
+el("gSpeak").onclick=function(){speak(S.pool[S.i][0])};
+
+/* ---------- 限时快答（四选一） ---------- */
+var Q={};
+function startQuiz(pool){
+  Q={pool:pool,i:0,score:0,time:60,answered:0,correct:0,wrong:[],locked:false,timer:null};
+  el("home").style.display="none";el("result").style.display="none";el("game").style.display="block";
+  el("spellArea").style.display="none";el("quizArea").style.display="block";
+  el("timerWrap").style.display="block";el("progWrap").style.display="none";
+  Q.timer=setInterval(function(){
+    Q.time--;el("timer").style.width=(Q.time/60*100)+"%";
+    el("timerWrap").classList.toggle("low",Q.time<=10);
+    el("hudRight").innerHTML="剩余 <b>"+Q.time+"</b> 秒";
+    if(Q.time<=0){clearInterval(Q.timer);showResultQuiz()}
+  },1000);
+  renderQuiz();
+}
+function renderQuiz(){
+  Q.locked=false;
+  var d=Q.pool[Q.i%Q.pool.length];
+  el("hudLeft").innerHTML="已答 <b>"+Q.answered+"</b> 题";
+  el("hudRight").innerHTML="剩余 <b>"+Q.time+"</b> 秒 · 得分 <b>"+Q.score+"</b>";
+  el("qMean").textContent=d[2];
+  el("qPos").textContent=d[3]+" · 选出正确的英文";
+  el("qFb").innerHTML="";
+  // 干扰项：优先同话题
+  var distract=shuffle(Q.pool.filter(function(x){return x[0]!==d[0]&&(x[3]===d[3]||Math.random()<0.25)})).slice(0,3);
+  var extra=shuffle(Q.pool.filter(function(x){return x[0]!==d[0]&&distract.indexOf(x)<0}));
+  while(distract.length<3&&extra.length)distract.push(extra.pop());
+  var opts=shuffle([d].concat(distract));
+  var wrap=el("qOpts");wrap.innerHTML="";
+  opts.forEach(function(o){
+    var b=document.createElement("button");b.className="qopt";b.textContent=o[0];
+    b.onclick=function(){quizAnswer(b,o,d)};wrap.appendChild(b);
+  });
+  Q.cur=d;
+}
+function quizAnswer(btn,o,d){
+  if(Q.locked)return;Q.locked=true;Q.answered++;
+  var btns=el("qOpts").children;
+  if(o[0]===d[0]){
+    btn.className="qopt ok";Q.correct++;Q.score+=10;Q.time+=1;
+    el("qFb").innerHTML='<span class="ok">正确！+10 分，+1 秒</span>';
+  }else{
+    btn.className="qopt bad";Q.score=Math.max(0,Q.score-5);Q.time-=3;
+    Q.wrong.push(d);addWrong(d);
+    for(var i=0;i<btns.length;i++)if(btns[i].textContent===d[0])btns[i].className="qopt ok";
+    el("qFb").innerHTML='<span class="bad">正确答案：<b>'+d[0]+'</b>（-3 秒）</span>';
+  }
+  el("hudRight").innerHTML="剩余 <b>"+Q.time+"</b> 秒 · 得分 <b>"+Q.score+"</b>";
+  Q.i++;
+  setTimeout(function(){
+    if(Q.time<=0){clearInterval(Q.timer);showResultQuiz();return}
+    renderQuiz();
+  },900);
+}
+el("qSpeak").onclick=function(){speak(Q.cur[0])};
+
+/* ---------- 结算 ---------- */
+function gradeOf(pct,mode){
+  if(pct>=0.9)return mode==="quiz"?"反应如闪电，词库已被你攻陷！":"接近满分，这 800 词对你已是囊中之物！";
+  if(pct>=0.75)return"很强！错词再复习一轮就能封顶。";
+  if(pct>=0.5)return"不错，稳扎稳打，错词本见。";
+  if(pct>=0.3)return"渐入佳境，建议缩小话题范围专项突破。";
+  return"万事开头难，先从错词本里的 10 个词开始吧！";
+}
+function fillWrongList(wrongArr){
+  var wrap=el("rWrong");
+  if(!wrongArr.length){wrap.innerHTML='<div class="empty">零失误，完美通关</div>';return}
+  wrap.innerHTML=wrongArr.map(function(d){
+    return '<div class="wrong-item"><span class="w" data-w="'+d[0]+'">'+d[0]+'</span><span class="c">'+d[1]+'<br>'+d[2]+'</span></div>';
+  }).join("");
+  wrap.querySelectorAll(".w").forEach(function(x){x.onclick=function(){speak(this.dataset.w)}});
+}
+function showResult(cleared){
+  clearInterval(Q.timer||null);
+  el("game").style.display="none";el("result").style.display="block";
+  el("rTitle").textContent=S.review?"复习完成":"闯关"+(cleared?"通关":"结束");
+  el("rScore").textContent=S.score;
+  var pct=S.answered?S.correct/S.answered:0;
+  el("rStats").innerHTML=
+    '<span class="statchip">答题 <b>'+S.answered+'</b></span>'+
+    '<span class="statchip">正确率 <b>'+Math.round(pct*100)+'%</b></span>'+
+    '<span class="statchip">最高连击 <b>×'+S.bestStreak+'</b></span>';
+  el("rGrade").textContent=gradeOf(pct,"spell");
+  fillWrongList(S.wrong);
+  setBest("tb8_best_spell",S.score);refreshBest();
+}
+function showResultQuiz(){
+  clearInterval(Q.timer);
+  el("game").style.display="none";el("result").style.display="block";
+  el("rTitle").textContent="时间到！";
+  el("rScore").textContent=Q.score;
+  var pct=Q.answered?Q.correct/Q.answered:0;
+  el("rStats").innerHTML=
+    '<span class="statchip">答题 <b>'+Q.answered+'</b></span>'+
+    '<span class="statchip">正确率 <b>'+Math.round(pct*100)+'%</b></span>';
+  el("rGrade").textContent=gradeOf(pct,"quiz");
+  fillWrongList(Q.wrong);
+  setBest("tb8_best_quiz",Q.score);refreshBest();
+}
+
+/* 记录拼写模式最高连击 */
+(function(){
+  var orig=spellAnswer;
+  spellAnswer=function(skipped){
+    var before=S.streak;
+    orig(skipped);
+    if(S.streak>S.bestStreak)S.bestStreak=S.streak;
+    if(S.streak===0&&before>(S.bestStreak||0))S.bestStreak=before;
+  };
+})();
+S.bestStreak=0;
+
+el("rRetry").onclick=function(){el("result").style.display="none";el("home").style.display="block"};
+el("rReview").onclick=function(){
+  var w=loadWrong();var keys=Object.keys(w);
+  if(!keys.length){alert("错词本是空的！");return}
+  startSpell(keys.map(function(k){return [k,w[k].ph,w[k].m,w[k].t]}),true);
+};
+el("rHome").onclick=function(){clearInterval(Q.timer||null);el("result").style.display="none";el("game").style.display="none";el("home").style.display="block"};
+
+refreshWrongCount();refreshBest();
+</script>
+</body>
+</html>
